@@ -1,0 +1,48 @@
+schema_version: "1.0"
+record_type: studio_verification
+verification:
+  id: "verification-YYYYMMDD-project"
+  assessment_id: "assessment-YYYYMMDD-project"
+  created_at: "YYYY-MM-DDTHH:MM:SS+08:00"
+  status: running
+  studio_url: "https://modelscope.cn/studios/owner/name"
+  deployed_revision: "commit-or-revision"
+
+runtime:
+  declared_sku: "platform-sku-or-application-label"
+  gpu_name: "exact nvidia-smi name"
+  compute_capability: "major.minor"
+  visible_vram_gib: null
+  python_version: "version"
+  torch_version: "version"
+  cuda_version: "version"
+  persistent_workspace:
+    path: "/mnt/workspace"
+    writable: null
+    free_disk_gib: null
+
+measurements:
+  first_startup_seconds: null
+  cached_startup_seconds: null
+  peak_vram_gib: null
+  inference_seconds: null
+  workload_envelope: recommended
+  cache_hit: null
+
+checks:
+  - id: core-flow
+    description: "推荐工作负载下完成核心体验"
+    status: pending
+    evidence: ""
+    success_criteria: "有效输入可产生符合预期类型的输出"
+
+condition_results: []
+remaining_external_calls: []
+issues: []
+
+result:
+  status: pending
+  summary: ""
+  verified_at: null
+
+secrets: []

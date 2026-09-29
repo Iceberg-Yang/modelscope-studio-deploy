@@ -1,0 +1,200 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://modelscope.cn/schemas/studio-assessment-1.0.json",
+  "title": "ModelScope Studio pre-deployment assessment",
+  "type": "object",
+  "required": ["schema_version", "record_type", "assessment", "request", "source", "evidence", "workload", "models", "target_runtime", "compatibility", "risks", "unknowns", "decision", "secrets"],
+  "properties": {
+    "schema_version": {"const": "1.0"},
+    "record_type": {"const": "studio_assessment"},
+    "assessment": {
+      "type": "object",
+      "required": ["id", "status", "created_at", "updated_at", "completeness", "assessed_revisions", "target_profile_version"],
+      "properties": {
+        "id": {"type": "string", "minLength": 1},
+        "status": {"enum": ["draft", "ready", "stale"]},
+        "created_at": {"type": "string", "minLength": 1},
+        "updated_at": {"type": "string", "minLength": 1},
+        "completeness": {"enum": ["incomplete", "complete"]},
+        "assessed_revisions": {"type": "object"},
+        "target_profile_version": {"type": "string", "minLength": 1}
+      }
+    },
+    "request": {
+      "type": "object",
+      "required": ["mode", "objective", "requested_target"],
+      "properties": {
+        "mode": {"enum": ["migrate_space", "build_from_model", "upgrade_existing_studio"]},
+        "objective": {"type": "string", "minLength": 1},
+        "requested_visibility": {"enum": ["private", "public", "unknown"]},
+        "requested_target": {"const": "modelscope_studio"}
+      }
+    },
+    "source": {
+      "type": "object",
+      "required": ["kind", "url", "revision", "license"],
+      "properties": {
+        "kind": {"enum": ["huggingface_space", "modelscope_model", "existing_modelscope_studio"]},
+        "url": {"type": "string", "minLength": 1},
+        "revision": {"type": "string", "minLength": 1},
+        "license": {"type": "string", "minLength": 1}
+      }
+    },
+    "evidence": {"type": "array", "items": {"$ref": "#/$defs/evidence"}},
+    "reference_implementations": {"type": "array", "items": {"type": "object"}},
+    "workload": {"$ref": "#/$defs/workload"},
+    "models": {"type": "array", "minItems": 1, "items": {"$ref": "#/$defs/model"}},
+    "source_runtime": {"type": "object"},
+    "target_runtime": {"type": "object", "required": ["platform", "sdk", "resource_class", "declared", "estimated", "measured"]},
+    "resource_requirements": {"type": "object"},
+    "external_dependencies": {"type": "array", "items": {"$ref": "#/$defs/external_dependency"}},
+    "compatibility": {
+      "type": "object",
+      "required": ["memory", "gpu_architecture", "precision", "cuda_kernels", "model_source", "framework", "runtime_semantics", "network", "storage", "license"],
+      "additionalProperties": {"$ref": "#/$defs/compatibility_finding"}
+    },
+    "reuse": {"type": "object"},
+    "risks": {"type": "array", "items": {"$ref": "#/$defs/risk"}},
+    "unknowns": {"type": "array", "items": {"$ref": "#/$defs/unknown"}},
+    "decision": {
+      "type": "object",
+      "required": ["recommendation", "rationale", "conditions", "decided_at"],
+      "properties": {
+        "recommendation": {"enum": ["proceed", "conditional_proceed", "needs_information", "stop"]},
+        "rationale": {"type": "string", "minLength": 1},
+        "conditions": {"type": "array", "items": {"$ref": "#/$defs/condition"}},
+        "decided_at": {"type": "string", "minLength": 1}
+      }
+    },
+    "implementation_plan": {"type": "array", "items": {"type": "object"}},
+    "verification_plan": {"type": "object"},
+    "secrets": {"type": "array", "items": {"$ref": "#/$defs/secret"}},
+    "approvals_required": {"type": "array", "items": {"type": "string"}}
+  },
+  "$defs": {
+    "evidence": {
+      "type": "object",
+      "required": ["id", "kind", "source_type", "source", "locator", "observed_at", "summary"],
+      "properties": {
+        "id": {"type": "string", "minLength": 1},
+        "kind": {"enum": ["observed", "inferred", "measured"]},
+        "source_type": {"type": "string", "minLength": 1},
+        "source": {"type": "string", "minLength": 1},
+        "locator": {"type": "string", "minLength": 1},
+        "revision": {"type": ["string", "null"]},
+        "observed_at": {"type": "string", "minLength": 1},
+        "summary": {"type": "string", "minLength": 1}
+      }
+    },
+    "workload": {
+      "type": "object",
+      "required": ["modality", "core_demo_flow", "inputs", "outputs", "concurrency", "acceptance_envelope"],
+      "properties": {
+        "modality": {"type": "string", "minLength": 1},
+        "core_demo_flow": {"type": "string", "minLength": 1},
+        "inputs": {"type": "array", "minItems": 1},
+        "outputs": {"type": "array", "minItems": 1},
+        "concurrency": {"type": "integer", "minimum": 1},
+        "acceptance_envelope": {
+          "type": "object",
+          "required": ["minimum", "recommended", "maximum"],
+          "additionalProperties": {"$ref": "#/$defs/envelope"}
+        }
+      }
+    },
+    "envelope": {
+      "type": "object",
+      "required": ["description", "parameters", "evidence_refs"],
+      "properties": {
+        "description": {"type": "string", "minLength": 1},
+        "parameters": {"type": "object"},
+        "evidence_refs": {"type": "array", "items": {"type": "string"}}
+      }
+    },
+    "model": {
+      "type": "object",
+      "required": ["role", "component", "source", "url", "revision", "dtype", "license", "remote_code", "required"],
+      "properties": {
+        "role": {"type": "string", "minLength": 1},
+        "component": {"type": "string", "minLength": 1},
+        "source": {"enum": ["modelscope", "bundled", "other"]},
+        "url": {"type": "string", "minLength": 1},
+        "revision": {"type": "string", "minLength": 1},
+        "dtype": {"type": "string", "minLength": 1},
+        "weight_size_gb": {"type": ["number", "null"], "minimum": 0},
+        "license": {"type": "string", "minLength": 1},
+        "remote_code": {"type": "boolean"},
+        "required": {"type": "boolean"}
+      }
+    },
+    "external_dependency": {
+      "type": "object",
+      "required": ["name", "kind", "stage", "required", "migration_action"],
+      "properties": {
+        "name": {"type": "string", "minLength": 1},
+        "kind": {"enum": ["model", "git", "package", "cdn", "font", "media", "api", "database", "storage", "remote_code", "other"]},
+        "stage": {"enum": ["build", "startup", "runtime"]},
+        "required": {"type": "boolean"},
+        "migration_action": {"type": "string", "minLength": 1}
+      }
+    },
+    "compatibility_finding": {
+      "type": "object",
+      "required": ["status", "finding", "confidence", "evidence_refs"],
+      "properties": {
+        "status": {"enum": ["compatible", "adaptation_required", "blocked", "unknown", "not_applicable"]},
+        "finding": {"type": "string", "minLength": 1},
+        "confidence": {"enum": ["high", "medium", "low"]},
+        "evidence_refs": {"type": "array", "items": {"type": "string"}}
+      }
+    },
+    "risk": {
+      "type": "object",
+      "required": ["id", "category", "severity", "status", "statement", "evidence_refs", "mitigation", "validation", "success_criteria"],
+      "properties": {
+        "id": {"type": "string", "minLength": 1},
+        "category": {"type": "string", "minLength": 1},
+        "severity": {"enum": ["low", "medium", "high", "critical"]},
+        "status": {"enum": ["open", "mitigated", "accepted", "closed"]},
+        "statement": {"type": "string", "minLength": 1},
+        "evidence_refs": {"type": "array", "items": {"type": "string"}},
+        "mitigation": {"type": "string", "minLength": 1},
+        "validation": {"type": "string", "minLength": 1},
+        "success_criteria": {"type": "string", "minLength": 1}
+      }
+    },
+    "unknown": {
+      "type": "object",
+      "required": ["id", "question", "critical", "status", "evidence_refs", "resolution_action"],
+      "properties": {
+        "id": {"type": "string", "minLength": 1},
+        "question": {"type": "string", "minLength": 1},
+        "critical": {"type": "boolean"},
+        "status": {"enum": ["open", "resolved"]},
+        "evidence_refs": {"type": "array", "items": {"type": "string"}},
+        "resolution_action": {"type": "string", "minLength": 1}
+      }
+    },
+    "condition": {
+      "type": "object",
+      "required": ["action", "reason", "validation", "success_criteria", "failure_action"],
+      "properties": {
+        "action": {"type": "string", "minLength": 1},
+        "reason": {"type": "string", "minLength": 1},
+        "validation": {"type": "string", "minLength": 1},
+        "success_criteria": {"type": "string", "minLength": 1},
+        "failure_action": {"type": "string", "minLength": 1}
+      }
+    },
+    "secret": {
+      "type": "object",
+      "required": ["name", "purpose", "required_at"],
+      "additionalProperties": false,
+      "properties": {
+        "name": {"type": "string", "minLength": 1},
+        "purpose": {"type": "string", "minLength": 1},
+        "required_at": {"enum": ["build", "startup", "runtime"]}
+      }
+    }
+  }
+}

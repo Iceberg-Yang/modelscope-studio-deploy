@@ -1,0 +1,200 @@
+schema_version: "1.0"
+record_type: studio_assessment
+assessment:
+  id: "assessment-YYYYMMDD-project"
+  status: draft
+  created_at: "YYYY-MM-DDTHH:MM:SS+08:00"
+  updated_at: "YYYY-MM-DDTHH:MM:SS+08:00"
+  completeness: incomplete
+  assessed_revisions:
+    source: "commit-or-revision"
+    model: "model-revision"
+    reference_implementations: []
+  target_profile_version: "l20-48gb-observed-YYYYMMDD"
+
+request:
+  mode: build_from_model
+  objective: "用户可体验的核心流程"
+  requested_visibility: private
+  requested_target: modelscope_studio
+
+source:
+  kind: modelscope_model
+  url: "https://modelscope.cn/models/owner/model"
+  revision: "revision"
+  license: "license-or-unknown"
+
+evidence:
+  - id: ev-model-card
+    kind: observed
+    source_type: official_model_card
+    source: "ModelScope model card"
+    locator: "https://modelscope.cn/models/owner/model"
+    revision: "revision"
+    observed_at: "YYYY-MM-DDTHH:MM:SS+08:00"
+    summary: "与评估有关的事实摘要"
+
+reference_implementations: []
+
+workload:
+  modality: "text-to-text"
+  core_demo_flow: "输入、推理、输出的核心体验"
+  inputs: ["prompt"]
+  outputs: ["text"]
+  concurrency: 1
+  acceptance_envelope:
+    minimum:
+      description: "仍能完成核心体验的下限"
+      parameters: {}
+      evidence_refs: [ev-model-card]
+    recommended:
+      description: "本次主要评估和验收的工作负载"
+      parameters: {}
+      evidence_refs: [ev-model-card]
+    maximum:
+      description: "官方资料展示或目标允许的上限"
+      parameters: {}
+      evidence_refs: [ev-model-card]
+
+models:
+  - role: primary
+    component: transformer
+    source: modelscope
+    url: "https://modelscope.cn/models/owner/model"
+    revision: "revision"
+    dtype: "bf16"
+    weight_size_gb: null
+    license: "license-or-unknown"
+    remote_code: false
+    required: true
+
+source_runtime:
+  sdk: null
+  gpu: null
+  visible_vram_gib: null
+  framework: null
+  precision: null
+
+target_runtime:
+  platform: modelscope_studio
+  sdk: gradio
+  resource_class: xgpu
+  declared:
+    sku: "platform-sku-or-application-label"
+    gpu: "NVIDIA L20"
+    nominal_vram_gb: 48
+    evidence_refs: []
+  estimated:
+    peak_vram_gib: null
+    host_memory_gib: null
+    disk_gib: null
+    startup_seconds: null
+  measured: null
+
+resource_requirements:
+  model_storage_gb: null
+  host_memory_gib: null
+  gpu_memory_gib:
+    weights: null
+    activations: null
+    attention: null
+    vae_or_decoder: null
+    temporary_peak: null
+    safety_margin: null
+  disk_gib:
+    download: null
+    installed: null
+    cache: null
+  startup:
+    download_required: true
+    compile_required: false
+    estimated_seconds: null
+
+external_dependencies: []
+
+compatibility:
+  memory:
+    status: unknown
+    finding: "待估算或实测"
+    confidence: low
+    evidence_refs: []
+  gpu_architecture:
+    status: unknown
+    finding: "待检查算子和 kernel"
+    confidence: low
+    evidence_refs: []
+  precision:
+    status: unknown
+    finding: "待检查目标精度路径"
+    confidence: low
+    evidence_refs: []
+  cuda_kernels:
+    status: unknown
+    finding: "待检查"
+    confidence: low
+    evidence_refs: []
+  model_source:
+    status: compatible
+    finding: "已确认 ModelScope 模型链接"
+    confidence: high
+    evidence_refs: [ev-model-card]
+  framework:
+    status: unknown
+    finding: "待检查"
+    confidence: low
+    evidence_refs: []
+  runtime_semantics:
+    status: unknown
+    finding: "待检查队列、并发和超时"
+    confidence: low
+    evidence_refs: []
+  network:
+    status: unknown
+    finding: "待盘点运行时网络依赖"
+    confidence: low
+    evidence_refs: []
+  storage:
+    status: unknown
+    finding: "待估算缓存与磁盘"
+    confidence: low
+    evidence_refs: []
+  license:
+    status: unknown
+    finding: "待确认公开演示要求"
+    confidence: low
+    evidence_refs: []
+
+reuse:
+  candidates: []
+  selected_level: none
+  reusable_parts: []
+  replace_parts: []
+  attribution_required: []
+  cache_compatibility: unknown
+  update_in_place: false
+
+risks: []
+
+unknowns:
+  - id: unknown-memory
+    question: "推荐工作负载的峰值显存是多少？"
+    critical: true
+    status: open
+    evidence_refs: []
+    resolution_action: "完成估算或目标环境探测"
+
+decision:
+  recommendation: needs_information
+  rationale: "存在关键未知项"
+  conditions: []
+  decided_at: "YYYY-MM-DDTHH:MM:SS+08:00"
+
+implementation_plan: []
+
+verification_plan:
+  core_flow_checks: []
+  resource_checks: ["actual_gpu", "visible_vram", "peak_vram", "startup_time"]
+  external_dependency_checks: ["remaining_runtime_network_calls"]
+
+secrets: []
+approvals_required: []
